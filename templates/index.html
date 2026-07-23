@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntoFit &mdash; Yoga Poses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='yoga-style.css') }}">
+</head>
+<body class="poses-page">
+    <header class="nav-header">
+        <div class="nav-container">
+            <a class="logo" href="{{ url_for('home') }}">AntoFit</a>
+            <nav class="nav-links">
+                {% for link in nav_links %}
+                    <a href="{{ link.url }}" class="nav-link{% if request.path == link.url %} active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="poses-content">
+        <section class="poses-hero">
+            <h1>Yoga Poses for Pain Relief</h1>
+            {% if selected_pain_areas %}
+                <p class="subtitle">Personalized recommendations for
+                    <span class="selected-list">
+                        {% for area in selected_pain_areas %}
+                            <span class="pain-badge">{{ area.replace('_', ' ')|title }}</span>
+                        {% endfor %}
+                    </span>
+                </p>
+            {% else %}
+                <p class="subtitle">Explore our curated library of therapeutic yoga poses.</p>
+            {% endif %}
+            <div class="pose-hero-actions">
+                <a class="btn btn-primary" href="{{ url_for('yoga_try') }}">Try Live Detection</a>
+                {% if selected_pain_areas %}
+                    <a class="btn btn-outline" href="{{ url_for('poses') }}">Clear Filters</a>
+                    <a class="btn btn-outline" href="{{ url_for('home') }}">Change Pain Areas</a>
+                {% else %}
+                    <a class="btn btn-outline" href="{{ url_for('home') }}">Select Pain Areas</a>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="search-filter-section" role="search">
+            <div class="search-input-wrapper">
+                <span class="search-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"></path>
+                    </svg>
+                </span>
+                <input id="searchInput" class="search-input" type="search" placeholder="Search poses by name or pain area..." aria-label="Search poses" autocomplete="off">
+            </div>
+            <div class="filter-buttons" aria-label="Filter poses by category">
+                <button class="filter-btn active" type="button" data-category="all" aria-label="Show all poses">All Poses</button>
+                <button class="filter-btn" type="button" data-category="back" aria-label="Filter poses for back pain">Back Pain</button>
+                <button class="filter-btn" type="button" data-category="neck" aria-label="Filter poses for neck pain">Neck Pain</button>
+                <button class="filter-btn" type="button" data-category="stress" aria-label="Filter poses for stress relief">Stress Relief</button>
+                <button class="filter-btn" type="button" data-category="flexibility" aria-label="Filter poses for flexibility">Flexibility</button>
+                <button class="filter-btn" type="button" data-category="balance" aria-label="Filter poses for balance">Balance</button>
+            </div>
+            <div class="results-counter" id="resultsCounter" aria-live="polite">Showing all poses</div>
+        </section>
+
+        <section class="cards-section">
+            <div class="wrapper">
+                <div class="row">
+                    <div class="card" data-pose-name="Trikonasana" data-pain-areas="back,shoulders,hips,flexibility">
+                        <input type="checkbox" id="card1" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Trikonasana.jpg') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Trikonasana</h2>
+                                    <div class="pain-tags" aria-label="Pain areas supported">
+                                        <span class="pain-tag">Back Pain</span>
+                                        <span class="pain-tag">Shoulders</span>
+                                        <span class="pain-tag">Hips</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Strengthens legs and arms, improves digestion, stretches spine and hips, relieves back pain, and reduces stress and anxiety.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Stand with feet 3-4 feet apart.</li>
+                                            <li>Turn right foot out 90° and left foot slightly inward.</li>
+                                            <li>Extend arms parallel to the floor.</li>
+                                            <li>Bend to the right, hand to shin or floor.</li>
+                                            <li>Extend left arm upward, gaze at left hand.</li>
+                                            <li>Hold 30 seconds, repeat other side.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Avoid with low blood pressure, diarrhea, or headache. Modify if you have neck issues.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-pose-name="Virabadrasana" data-pain-areas="legs,hips,shoulders,balance">
+                        <input type="checkbox" id="card2" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Virabadrasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Virabadrasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Legs</span>
+                                            <span class="pain-tag">Hips</span>
+                                            <span class="pain-tag">Shoulders</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Strengthens legs and ankles, stretches hips and shoulders, improves balance and stamina, and enhances focus and determination.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Stand with feet wide apart.</li>
+                                            <li>Turn right foot out 90°.</li>
+                                            <li>Bend right knee over ankle.</li>
+                                            <li>Extend arms parallel to the floor.</li>
+                                            <li>Gaze over right hand.</li>
+                                            <li>Hold 30-60 seconds, switch sides.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Avoid with high blood pressure or heart issues. Be cautious with knee injuries.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-pose-name="Vrikshasana" data-pain-areas="balance,legs,focus,posture">
+                        <input type="checkbox" id="card3" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Vrikshasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Vrikshasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Balance</span>
+                                            <span class="pain-tag">Legs</span>
+                                            <span class="pain-tag">Posture</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Improves balance and stability, strengthens legs and core, enhances focus and concentration, and improves posture.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Shift weight onto left leg.</li>
+                                            <li>Place right foot on inner thigh or calf.</li>
+                                            <li>Bring hands to prayer at chest.</li>
+                                            <li>Raise arms overhead once steady.</li>
+                                            <li>Hold 30 seconds with steady breath.</li>
+                                            <li>Switch sides and repeat.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Avoid with recent knee or hip injury. Use wall support if needed.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="card" data-pose-name="Bhujangasana" data-pain-areas="back,spine,chest,flexibility">
+                        <input type="checkbox" id="card7" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Bhujangasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Bhujangasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Back Pain</span>
+                                            <span class="pain-tag">Spine</span>
+                                            <span class="pain-tag">Chest</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Strengthens spine and lower back, opens chest and lungs, improves blood circulation, and relieves back pain and stiffness.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Lie prone with legs extended.</li>
+                                            <li>Place palms beneath shoulders.</li>
+                                            <li>Press into palms to lift chest.</li>
+                                            <li>Keep elbows slightly bent.</li>
+                                            <li>Gaze upward, hold 15-30 seconds.</li>
+                                            <li>Lower slowly to the mat.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Avoid if pregnant or with back injury. Do not overextend the spine.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-pose-name="Sukhasana" data-pain-areas="stress,meditation,posture,breathing">
+                        <input type="checkbox" id="card8" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Sukhasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Sukhasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Stress Relief</span>
+                                            <span class="pain-tag">Meditation</span>
+                                            <span class="pain-tag">Posture</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Calms the mind, reduces stress and anxiety, improves posture, strengthens back muscles, and opens hips.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Sit on the floor or a cushion.</li>
+                                            <li>Cross legs comfortably.</li>
+                                            <li>Rest hands on knees.</li>
+                                            <li>Lengthen spine and relax shoulders.</li>
+                                            <li>Close eyes, breathe deeply.</li>
+                                            <li>Hold for 5-10 minutes.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Use cushioning if hips are tight. Avoid if you have severe knee problems.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-pose-name="Chakrasana" data-pain-areas="back,spine,flexibility,chest">
+                        <input type="checkbox" id="card9" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Chakrasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Chakrasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Back Pain</span>
+                                            <span class="pain-tag">Spine</span>
+                                            <span class="pain-tag">Flexibility</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Strengthens back and spine, opens chest and lungs, stimulates thyroid and pituitary glands, and increases flexibility.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Lie on back, bend knees hip-width.</li>
+                                            <li>Place palms beside ears.</li>
+                                            <li>Press into hands and feet.</li>
+                                            <li>Lift hips and chest.</li>
+                                            <li>Straighten arms if possible.</li>
+                                            <li>Hold 5-15 seconds, lower gently.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Advanced pose &mdash; avoid with back, wrist, or blood pressure issues. Warm up thoroughly.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="card" data-pose-name="Balasana" data-pain-areas="back,stress,relaxation,neck">
+                        <input type="checkbox" id="card4" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Balasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Balasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Back Pain</span>
+                                            <span class="pain-tag">Stress Relief</span>
+                                            <span class="pain-tag">Relaxation</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Gently stretches back and hips, relieves back and neck pain, calms the mind, and reduces stress and fatigue.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Kneel and sit back on heels.</li>
+                                            <li>Separate knees hip-width apart.</li>
+                                            <li>Fold forward, forehead to floor.</li>
+                                            <li>Extend arms forward or alongside the body.</li>
+                                            <li>Breathe deeply and relax.</li>
+                                            <li>Hold 1-5 minutes.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Avoid when pregnant or with knee injury. Support forehead for comfort.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" data-pose-name="Shavasana" data-pain-areas="stress,relaxation,recovery,meditation">
+                        <input type="checkbox" id="card5" class="more" aria-hidden="true">
+                        <div class="content">
+                            <div class="front" data-bg="{{ url_for('static', filename='img/Shavasana.png') }}">
+                                <div class="inner">
+                                    <span class="recommended-badge">Recommended</span>
+                                    <h2>Shavasana</h2>
+                                        <div class="pain-tags" aria-label="Pain areas supported">
+                                            <span class="pain-tag">Stress Relief</span>
+                                            <span class="pain-tag">Relaxation</span>
+                                            <span class="pain-tag">Recovery</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="inner">
+                                    <div class="pose-section">
+                                        <h3>Benefits</h3>
+                                        <div class="pose-benefits">Deeply relaxes body and mind, reduces stress and anxiety, improves memory and concentration, and lowers blood pressure.</div>
+                                    </div>
+                                    <div class="pose-section pose-steps">
+                                        <h3>Steps</h3>
+                                        <ol>
+                                            <li>Lie flat on your back.</li>
+                                            <li>Allow legs to fall open naturally.</li>
+                                            <li>Place arms beside body, palms up.</li>
+                                            <li>Close eyes and relax each muscle.</li>
+                                            <li>Breathe naturally.</li>
+                                            <li>Hold 5-15 minutes.</li>
+                                        </ol>
+                                    </div>
+                                    <div class="pose-section pose-precautions">
+                                        <h3>Precautions</h3>
+                                        <p>Use a blanket for comfort if cool. Stay present to avoid drifting to sleep.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>AntoFit — Personalized yoga guidance for pain relief and wellbeing.</p>
+            <p class="disclaimer">Always consult your healthcare provider before beginning any exercise regimen.</p>
+        </div>
+    </footer>
+
+    <script id="selectedPainAreasData" type="application/json">{{ (selected_pain_areas or [])|tojson|safe }}</script>
+    <script id="recommendedPosesData" type="application/json">{{ (recommended_poses or [])|tojson|safe }}</script>
+    <script>
+        let selectedPainAreas = [];
+        let recommendedPoses = [];
+
+        try {
+            const selectedPayload = document.getElementById('selectedPainAreasData')?.textContent || '[]';
+            selectedPainAreas = JSON.parse(selectedPayload);
+        } catch (error) {
+            console.error('Failed to parse selected pain areas JSON:', error);
+            selectedPainAreas = [];
+        }
+
+        try {
+            const recommendedPayload = document.getElementById('recommendedPosesData')?.textContent || '[]';
+            recommendedPoses = JSON.parse(recommendedPayload);
+        } catch (error) {
+            console.error('Failed to parse recommended poses JSON:', error);
+            recommendedPoses = [];
+        }
+
+        const cards = Array.from(document.querySelectorAll('.card'));
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = Array.from(document.querySelectorAll('.filter-btn'));
+        const resultsCounter = document.getElementById('resultsCounter');
+        let activeCategory = 'all';
+
+        document.querySelectorAll('.card .front').forEach((front) => {
+            const bg = front.getAttribute('data-bg');
+            if (bg) {
+                front.classList.add('loading');
+                const img = new Image();
+                img.onload = () => {
+                    front.style.backgroundImage = `url('${bg}')`;
+                    front.classList.remove('loading');
+                };
+                img.onerror = () => {
+                    front.classList.remove('loading');
+                };
+                img.src = bg;
+            }
+        });
+
+        cards.forEach((card) => {
+            const poseName = card.dataset.poseName;
+            if (recommendedPoses.includes(poseName)) {
+                card.classList.add('recommended');
+            }
+        });
+
+        const preselectedSearch = selectedPainAreas.join(' ');
+        if (preselectedSearch && searchInput) {
+            searchInput.value = preselectedSearch.replace(/_/g, ' ');
+        }
+
+        function matchesSearch(card, query) {
+            if (!query) return true;
+            const poseName = card.dataset.poseName.toLowerCase();
+            const areas = (card.dataset.painAreas || '').replace(/_/g, ' ').toLowerCase();
+            return `${poseName} ${areas}`.includes(query);
+        }
+
+        function matchesCategory(card, category) {
+            if (category === 'all') return true;
+            const areas = (card.dataset.painAreas || '').split(',').map((area) => area.trim().toLowerCase());
+            return areas.includes(category);
+        }
+
+        function showCard(card) {
+            card.classList.remove('hidden', 'fading-out');
+            card.classList.add('visible');
+            card.style.animation = 'fadeIn 0.4s ease-in-out';
+            setTimeout(() => {
+                card.style.animation = '';
+            }, 400);
+        }
+
+        function hideCard(card) {
+            if (card.classList.contains('hidden')) {
+                return;
+            }
+            card.classList.remove('visible');
+            card.classList.add('fading-out');
+            card.style.animation = 'fadeOut 0.3s ease-in-out';
+            setTimeout(() => {
+                card.classList.add('hidden');
+                card.classList.remove('fading-out');
+                card.style.animation = '';
+            }, 280);
+        }
+
+        function updateResults() {
+            const query = (searchInput?.value || '').trim().toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach((card) => {
+                const matches = matchesSearch(card, query) && matchesCategory(card, activeCategory);
+
+                if (matches) {
+                    showCard(card);
+                    visibleCount += 1;
+                } else {
+                    hideCard(card);
+                }
+            });
+
+            if (resultsCounter) {
+                const total = cards.length;
+                resultsCounter.textContent = `Showing ${visibleCount} of ${total} poses`;
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', updateResults);
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === '/' && document.activeElement !== searchInput) {
+                    event.preventDefault();
+                    searchInput.focus();
+                }
+
+                if (event.key === 'Escape') {
+                    if (searchInput.value) {
+                        searchInput.value = '';
+                        updateResults();
+                    }
+                    searchInput.blur();
+                }
+            });
+        }
+
+        filterButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach((btn) => btn.classList.remove('active'));
+                button.classList.add('active');
+                activeCategory = button.dataset.category;
+                updateResults();
+            });
+        });
+
+        updateResults();
+    </script>
+</body>
+</html>

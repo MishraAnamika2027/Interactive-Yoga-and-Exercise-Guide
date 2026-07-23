@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AntoFit - Interactive Yoga and Exercise Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='yoga-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home-style.css') }}">
+</head>
+<body>
+    <header class="nav-header">
+        <div class="nav-container">
+            <a class="logo" href="{{ url_for('home') }}">AntoFit</a>
+            <nav class="nav-links">
+                {% for link in nav_links %}
+                    <a href="{{ link.url }}" class="nav-link{% if request.path == link.url %} active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="home-main">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Interactive Yoga and Exercise Guide</h1>
+                <p>Select where you feel discomfort and we will guide you to targeted yoga poses for relief.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="{{ url_for('poses') }}">Browse All Poses</a>
+                    <a class="btn btn-outline" href="{{ url_for('yoga_try') }}">Try Live Detection</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="anatomy-section">
+            <div class="section-header">
+                <h2>Where do you feel pain?</h2>
+                <p>Tap on the body areas that need attention to build a personalized relief plan.</p>
+            </div>
+            <div class="diagram-wrapper">
+                <div class="diagram-container">
+                    <h3>Front View</h3>
+                    <svg class="body-diagram" viewBox="0 0 120 320" role="img" aria-label="Front view anatomy diagram">
+                        <g class="body-outline">
+                            <path d="M60 10c10 0 18 8 18 18s-8 18-18 18-18-8-18-18 8-18 18-18z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 46h30v38H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 84h30v64H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 148h30v70H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 218h30v70H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                        </g>
+                        <g class="body-region" data-pain-key="neck" id="front-neck">
+                            <rect x="50" y="38" width="20" height="12" rx="6"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="shoulders" id="front-shoulders">
+                            <rect x="32" y="52" width="56" height="14" rx="7"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="chest" id="front-chest">
+                            <rect x="46" y="68" width="28" height="20" rx="8"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="upper_back" id="front-upper-back">
+                            <rect x="46" y="90" width="28" height="24" rx="10"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="lower_back" id="front-lower-back">
+                            <rect x="46" y="118" width="28" height="32" rx="10"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="hips" id="front-hips">
+                            <rect x="42" y="152" width="36" height="26" rx="13"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="knees" id="front-knees-left">
+                            <rect x="46" y="200" width="10" height="32" rx="5"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="knees" id="front-knees-right">
+                            <rect x="64" y="200" width="10" height="32" rx="5"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="ankles" id="front-ankles-left">
+                            <rect x="48" y="244" width="8" height="22" rx="4"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="ankles" id="front-ankles-right">
+                            <rect x="64" y="244" width="8" height="22" rx="4"></rect>
+                        </g>
+                    </svg>
+                </div>
+                <div class="diagram-container">
+                    <h3>Back View</h3>
+                    <svg class="body-diagram" viewBox="0 0 120 320" role="img" aria-label="Back view anatomy diagram">
+                        <g class="body-outline">
+                            <path d="M60 10c10 0 18 8 18 18s-8 18-18 18-18-8-18-18 8-18 18-18z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 46h30v38H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 84h30v64H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 148h30v70H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                            <path d="M45 218h30v70H45z" fill="#f4f4f4" stroke="#5f5f5f" stroke-width="1.5"/>
+                        </g>
+                        <g class="body-region" data-pain-key="neck" id="back-neck">
+                            <rect x="50" y="38" width="20" height="12" rx="6"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="shoulders" id="back-shoulders">
+                            <rect x="32" y="52" width="56" height="14" rx="7"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="upper_back" id="back-upper-back">
+                            <rect x="46" y="70" width="28" height="24" rx="10"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="lower_back" id="back-lower-back">
+                            <rect x="46" y="104" width="28" height="32" rx="10"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="hips" id="back-hips">
+                            <rect x="42" y="140" width="36" height="26" rx="13"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="hamstrings" id="back-hamstrings-left">
+                            <rect x="46" y="182" width="10" height="32" rx="5"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="hamstrings" id="back-hamstrings-right">
+                            <rect x="64" y="182" width="10" height="32" rx="5"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="calves" id="back-calves-left">
+                            <rect x="46" y="220" width="10" height="30" rx="5"></rect>
+                        </g>
+                        <g class="body-region" data-pain-key="calves" id="back-calves-right">
+                            <rect x="64" y="220" width="10" height="30" rx="5"></rect>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div class="selection-panel">
+                <h3>Selected Areas</h3>
+                <div id="selectedAreas" class="selected-areas" aria-live="polite"></div>
+                <div class="selection-actions">
+                    <button id="clearSelection" class="btn btn-outline" type="button">Clear Selection</button>
+                    <button id="findRelief" class="btn btn-primary" type="button" disabled>Find Relief</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>AntoFit &mdash; Personalized yoga guidance for pain relief and wellbeing.</p>
+            <p class="disclaimer">Always consult your healthcare provider before beginning any exercise regimen.</p>
+        </div>
+    </footer>
+
+    <script>
+        const PAIN_AREA_LABELS = {
+            neck: 'Neck',
+            shoulders: 'Shoulders',
+            chest: 'Chest',
+            upper_back: 'Upper Back',
+            lower_back: 'Lower Back',
+            hips: 'Hips',
+            knees: 'Knees',
+            ankles: 'Ankles',
+            hamstrings: 'Hamstrings',
+            calves: 'Calves',
+            stress: 'Stress Relief',
+            balance: 'Balance'
+        };
+
+        const selectedAreas = new Set();
+        const selectedAreasContainer = document.getElementById('selectedAreas');
+        const findReliefButton = document.getElementById('findRelief');
+        const clearSelectionButton = document.getElementById('clearSelection');
+
+        function updateSelectionUI() {
+            selectedAreasContainer.innerHTML = '';
+
+            if (selectedAreas.size === 0) {
+                const placeholder = document.createElement('p');
+                placeholder.className = 'selection-placeholder';
+                placeholder.textContent = 'No areas selected yet.';
+                selectedAreasContainer.appendChild(placeholder);
+                findReliefButton.disabled = true;
+                return;
+            }
+
+            selectedAreas.forEach((key) => {
+                const badge = document.createElement('span');
+                badge.className = 'pain-badge';
+                badge.textContent = PAIN_AREA_LABELS[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'badge-remove';
+                remove.setAttribute('aria-label', `Remove ${badge.textContent}`);
+                remove.textContent = '×';
+                remove.addEventListener('click', () => toggleArea(key));
+
+                badge.appendChild(remove);
+                selectedAreasContainer.appendChild(badge);
+            });
+
+            findReliefButton.disabled = false;
+        }
+
+        function toggleArea(areaKey) {
+            if (selectedAreas.has(areaKey)) {
+                selectedAreas.delete(areaKey);
+            } else {
+                selectedAreas.add(areaKey);
+            }
+
+            document.querySelectorAll(`.body-region[data-pain-key="${areaKey}"]`).forEach((region) => {
+                region.classList.toggle('active', selectedAreas.has(areaKey));
+            });
+
+            updateSelectionUI();
+        }
+
+        document.querySelectorAll('.body-region').forEach((region) => {
+            region.addEventListener('click', () => {
+                const key = region.getAttribute('data-pain-key');
+                toggleArea(key);
+            });
+
+            region.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    const key = region.getAttribute('data-pain-key');
+                    toggleArea(key);
+                }
+            });
+
+            region.setAttribute('tabindex', '0');
+            region.setAttribute('role', 'button');
+            const label = PAIN_AREA_LABELS[region.getAttribute('data-pain-key')] || 'Pain area';
+            region.setAttribute('aria-label', `Select ${label}`);
+        });
+
+        const posesUrl = "{{ url_for('poses') }}";
+
+        findReliefButton.addEventListener('click', () => {
+            if (selectedAreas.size === 0) {
+                return;
+            }
+            const areas = Array.from(selectedAreas).join(',');
+            window.location.href = `${posesUrl}?pain=${encodeURIComponent(areas)}`;
+        });
+
+        clearSelectionButton.addEventListener('click', () => {
+            selectedAreas.clear();
+            document.querySelectorAll('.body-region').forEach((region) => region.classList.remove('active'));
+            updateSelectionUI();
+        });
+
+        updateSelectionUI();
+    </script>
+</body>
+</html>

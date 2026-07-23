@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntoFit - Live Pose Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='yoga-style.css') }}">
+</head>
+<body class="detection-page">
+    <header class="nav-header">
+        <div class="nav-container">
+            <a class="logo" href="{{ url_for('home') }}">AntoFit</a>
+            <nav class="nav-links">
+                {% for link in nav_links %}
+                    <a href="{{ link.url }}" class="nav-link{% if request.path == link.url %} active{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="detection-main" role="main">
+        <div class="page-header">
+            <h1>Live Pose Detection</h1>
+            <p class="subtitle">Perform yoga poses and get real-time feedback on your form</p>
+        </div>
+
+        <div class="detection-container">
+            <section class="video-column" aria-labelledby="videoColumnTitle">
+                <div class="camera-controls-panel" aria-live="polite">
+                    <h2 id="videoColumnTitle" class="sr-only">Camera Controls</h2>
+                    <label for="cameraSelect">Select Camera</label>
+                    <select id="cameraSelect" aria-label="Available cameras">
+                        <option value="">Loading cameras...</option>
+                    </select>
+                    <button id="switchCameraBtn" class="btn btn-primary" type="button">Switch Camera</button>
+                    <div id="cameraStatus" class="camera-status" role="status" aria-live="polite"></div>
+                </div>
+
+                <div class="video-wrapper" aria-live="polite">
+                    <div class="video-loading" id="videoLoading">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <p>Initializing camera...</p>
+                    </div>
+                    <div class="video-error" id="videoError" role="alert" style="display: none;">
+                        <p>⚠️ Camera connection lost</p>
+                        <button class="btn btn-outline" type="button" id="retryVideo">Retry</button>
+                    </div>
+                    <img id="videoFeed" src="{{ url_for('video_feed1') }}" alt="Live pose detection feed">
+                </div>
+
+                <div class="video-status" id="videoStatus" role="status" aria-live="polite">🟢 Live Detection Active</div>
+            </section>
+
+            <aside class="metrics-column" aria-label="Pose metrics and guidance">
+                <div class="metrics-card pose-status-card" aria-live="polite">
+                    <h3>Current Pose</h3>
+                    <div id="currentPose" class="pose-name" role="status" aria-live="polite">Detecting...</div>
+                    <div class="confidence-section">
+                        <span>Confidence</span>
+                        <div class="confidence-bar" aria-hidden="true">
+                            <div id="confidenceProgress" class="confidence-fill confidence-low" style="width: 0%"></div>
+                        </div>
+                        <span id="confidenceValue" class="confidence-text">0%</span>
+                    </div>
+                </div>
+
+                <div class="metrics-card angles-card" aria-live="polite">
+                    <h3>Joint Angles</h3>
+                    <div class="angle-list">
+                        <div class="angle-item"><span class="angle-label">Left Elbow</span><span class="angle-value" id="leftElbowAngle">--°</span></div>
+                        <div class="angle-item"><span class="angle-label">Right Elbow</span><span class="angle-value" id="rightElbowAngle">--°</span></div>
+                        <div class="angle-item"><span class="angle-label">Left Shoulder</span><span class="angle-value" id="leftShoulderAngle">--°</span></div>
+                        <div class="angle-item"><span class="angle-label">Right Shoulder</span><span class="angle-value" id="rightShoulderAngle">--°</span></div>
+                        <div class="angle-item"><span class="angle-label">Left Knee</span><span class="angle-value" id="leftKneeAngle">--°</span></div>
+                        <div class="angle-item"><span class="angle-label">Right Knee</span><span class="angle-value" id="rightKneeAngle">--°</span></div>
+                    </div>
+                </div>
+
+                <div class="metrics-card tips-card" aria-live="polite">
+                    <h3>Real-time Feedback</h3>
+                    <div id="poseFeedback" class="feedback-text" aria-live="polite">Position yourself in front of the camera to begin.</div>
+                </div>
+
+                <div class="metrics-card reference-card">
+                    <h3>Reference Poses</h3>
+                    <div class="reference-grid">
+                        <div class="reference-item">
+                            <img src="{{ url_for('static', filename='img/T pose.png') }}" alt="T Pose reference">
+                            <span class="reference-label">T Pose</span>
+                        </div>
+                        <div class="reference-item">
+                            <img src="{{ url_for('static', filename='img/Tree pose.png') }}" alt="Tree Pose reference">
+                            <span class="reference-label">Tree Pose</span>
+                        </div>
+                        <div class="reference-item">
+                            <img src="{{ url_for('static', filename='img/Warrior II pose.png') }}" alt="Warrior II Pose reference">
+                            <span class="reference-label">Warrior II</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>AntoFit — Personalized yoga guidance for pain relief and wellbeing.</p>
+            <p class="disclaimer">Always consult your healthcare provider before beginning any exercise regimen.</p>
+        </div>
+    </footer>
+
+    <script>
+        const cameraSelect = document.getElementById('cameraSelect');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const videoFeed = document.getElementById('videoFeed');
+        const videoLoading = document.getElementById('videoLoading');
+        const videoError = document.getElementById('videoError');
+        const retryVideo = document.getElementById('retryVideo');
+        const videoStatus = document.getElementById('videoStatus');
+
+        const currentPoseEl = document.getElementById('currentPose');
+        const confidenceValueEl = document.getElementById('confidenceValue');
+        const confidenceProgressEl = document.getElementById('confidenceProgress');
+        const poseFeedbackEl = document.getElementById('poseFeedback');
+
+        const angleElements = {
+            left_elbow: document.getElementById('leftElbowAngle'),
+            right_elbow: document.getElementById('rightElbowAngle'),
+            left_shoulder: document.getElementById('leftShoulderAngle'),
+            right_shoulder: document.getElementById('rightShoulderAngle'),
+            left_knee: document.getElementById('leftKneeAngle'),
+            right_knee: document.getElementById('rightKneeAngle'),
+        };
+
+        const JOINT_LABELS = {
+            left_elbow: 'Left Elbow',
+            right_elbow: 'Right Elbow',
+            left_shoulder: 'Left Shoulder',
+            right_shoulder: 'Right Shoulder',
+            left_knee: 'Left Knee',
+            right_knee: 'Right Knee'
+        };
+
+        const METRICS_ENDPOINT = '/pose_metrics';
+        const METRICS_POLL_INTERVAL = 1500;
+        let metricsIntervalHandle = null;
+        let lastMetricsErrorShown = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAvailableCameras();
+        });
+
+        function setCameraStatus(message, type = 'info') {
+            cameraStatus.textContent = message;
+            cameraStatus.className = `camera-status ${type}`;
+        }
+
+        function loadAvailableCameras(retryCount = 0) {
+            setCameraStatus('Loading available cameras...');
+            fetch('/get_available_cameras')
+                .then((response) => response.json())
+                .then((data) => {
+                    cameraSelect.innerHTML = '';
+
+                    if (!Array.isArray(data.cameras) || data.cameras.length === 0) {
+                        cameraSelect.innerHTML = '<option value="">No cameras found</option>';
+                        switchCameraBtn.disabled = true;
+                        setCameraStatus('No cameras detected. Connect a camera and retry.', 'warning');
+                        return;
+                    }
+
+                    data.cameras.forEach((camera) => {
+                        const option = document.createElement('option');
+                        option.value = camera.index;
+                        option.textContent = `${camera.name} — ${camera.resolution}`;
+                        option.title = `Backend: ${camera.backend}`;
+                        if (data.activeCameraIndex === camera.index) {
+                            option.selected = true;
+                        }
+                        cameraSelect.appendChild(option);
+                    });
+
+                    switchCameraBtn.disabled = false;
+                    setCameraStatus('Cameras loaded successfully.', 'success');
+                })
+                .catch((error) => {
+                    console.error('Error loading cameras:', error);
+                    cameraSelect.innerHTML = '<option value="">Error loading cameras</option>';
+                    switchCameraBtn.disabled = true;
+                    if (retryCount < 2) {
+                        setCameraStatus('Retrying to load cameras...', 'warning');
+                        setTimeout(() => loadAvailableCameras(retryCount + 1), 1500);
+                    } else {
+                        setCameraStatus('Unable to load cameras. Please check connections and reload.', 'error');
+                    }
+                });
+        }
+
+        switchCameraBtn.addEventListener('click', () => {
+            const cameraIndex = cameraSelect.value;
+
+            if (cameraIndex === '') {
+                setCameraStatus('Please select a camera before switching.', 'warning');
+                return;
+            }
+
+            switchCameraBtn.disabled = true;
+            switchCameraBtn.textContent = 'Switching...';
+            setCameraStatus('Switching camera...');
+
+            fetch('/set_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `camera_index=${encodeURIComponent(cameraIndex)}`
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        const currentSrc = videoFeed.src.split('?')[0];
+                        videoFeed.src = `${currentSrc}?t=${Date.now()}`;
+                        setCameraStatus('Camera switched successfully.', 'success');
+                        videoStatus.textContent = '🟢 Live Detection Active';
+                    } else {
+                        setCameraStatus('Failed to switch camera. Please try again.', 'error');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error switching camera:', error);
+                    setCameraStatus('Error switching camera. Check connection and retry.', 'error');
+                })
+                .finally(() => {
+                    switchCameraBtn.textContent = 'Switch Camera';
+                    switchCameraBtn.disabled = false;
+                });
+        });
+
+        retryVideo.addEventListener('click', () => {
+            videoError.style.display = 'none';
+            videoLoading.style.display = 'flex';
+            const currentSrc = videoFeed.src.split('?')[0];
+            videoFeed.src = `${currentSrc}?t=${Date.now()}`;
+            videoStatus.textContent = '🟡 Reconnecting...';
+        });
+
+        videoFeed.addEventListener('load', () => {
+            videoLoading.style.display = 'none';
+            videoError.style.display = 'none';
+            videoStatus.textContent = '🟢 Live Detection Active';
+        });
+
+        videoFeed.addEventListener('error', () => {
+            videoLoading.style.display = 'none';
+            videoError.style.display = 'flex';
+            videoStatus.textContent = '🔴 Detection Offline';
+        });
+
+        function formatAngle(angle) {
+            if (typeof angle === 'number' && Number.isFinite(angle)) {
+                return `${angle.toFixed(1)}°`;
+            }
+            return '--°';
+        }
+
+        function getConfidenceClass(confidence) {
+            if (confidence >= 80) {
+                return 'confidence-high';
+            }
+            if (confidence >= 50) {
+                return 'confidence-medium';
+            }
+            return 'confidence-low';
+        }
+
+        function buildFeedbackMessage(data) {
+            if (data.isStale) {
+                return 'Waiting for camera input...';
+            }
+
+            if (!data.label || data.label === 'Unknown Pose') {
+                return 'We are calibrating. Hold a steady yoga pose within the frame for best detection.';
+            }
+
+            const lowConfidenceJoints = Object.entries(data.joint_confidences || {})
+                .filter(([, value]) => value < 60)
+                .map(([joint]) => JOINT_LABELS[joint] || joint.replace('_', ' '));
+
+            if (lowConfidenceJoints.length === 0) {
+                return `Nice work! Keep holding your ${data.label.toLowerCase()} steadily.`;
+            }
+
+            if (lowConfidenceJoints.length === 1) {
+                return `Adjust your ${lowConfidenceJoints[0]} to improve alignment.`;
+            }
+
+            return `Focus on aligning: ${lowConfidenceJoints.slice(0, 3).join(', ')}.`;
+        }
+
+        function updateMetricsUI(data) {
+            lastMetricsErrorShown = false;
+
+            if (data.isStale) {
+                videoStatus.textContent = '🟡 Waiting for movement';
+            } else if (data.label && data.label !== 'Unknown Pose') {
+                videoStatus.textContent = `🟢 Recognized: ${data.label}`;
+            } else {
+                videoStatus.textContent = '🟡 Pose not detected';
+            }
+
+            const displayLabel = !data.label || data.label === 'Unknown Pose' ? 'Detecting...' : data.label;
+            currentPoseEl.textContent = displayLabel;
+
+            const confidence = Math.max(0, Math.min(100, Number(data.confidence) || 0));
+            confidenceValueEl.textContent = `${Math.round(confidence)}%`;
+            confidenceProgressEl.style.width = `${confidence}%`;
+            confidenceProgressEl.className = `confidence-fill ${getConfidenceClass(confidence)}`;
+
+            Object.entries(angleElements).forEach(([joint, element]) => {
+                const angleValue = data.angles ? data.angles[joint] : undefined;
+                element.textContent = formatAngle(angleValue);
+            });
+
+            poseFeedbackEl.textContent = buildFeedbackMessage(data);
+        }
+
+        function fetchPoseMetrics() {
+            fetch(METRICS_ENDPOINT, { cache: 'no-store' })
+                .then((response) => response.json())
+                .then((data) => {
+                    updateMetricsUI(data);
+                })
+                .catch((error) => {
+                    console.error('Error fetching pose metrics:', error);
+                    if (!lastMetricsErrorShown) {
+                        poseFeedbackEl.textContent = 'Unable to retrieve pose metrics. Please check your connection.';
+                        lastMetricsErrorShown = true;
+                    }
+                });
+        }
+
+        function startMetricsPolling() {
+            if (metricsIntervalHandle !== null) {
+                clearInterval(metricsIntervalHandle);
+            }
+            fetchPoseMetrics();
+            metricsIntervalHandle = setInterval(fetchPoseMetrics, METRICS_POLL_INTERVAL);
+        }
+
+        window.addEventListener('focus', startMetricsPolling);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                startMetricsPolling();
+            } else if (metricsIntervalHandle !== null) {
+                clearInterval(metricsIntervalHandle);
+                metricsIntervalHandle = null;
+            }
+        });
+
+        startMetricsPolling();
+    </script>
+</body>
+</html>
