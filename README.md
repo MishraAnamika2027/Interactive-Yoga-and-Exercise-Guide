@@ -190,9 +190,6 @@ Contributions are welcome! Here's how you can help:
 
 This project is open source and available under the MIT License.
 
-## 👥 Authors
-
-- Original implementation by [@selcia25](https://github.com/selcia25)
 
 ## 🙏 Acknowledgments
 
